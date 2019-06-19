@@ -1,9 +1,13 @@
 package com.maxfin.openweather
 
+import android.content.Intent
+import android.os.AsyncTask
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -14,56 +18,79 @@ import kotlinx.android.synthetic.main.activity_main.*
 class MainActivity : AppCompatActivity() {
 
     private var townListAdapter: TownListAdapter? = null
-
-
+    private var list: List<Town> = ArrayList()
+    private var townManager = TownManager()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
+        town_recycler_view.layoutManager = LinearLayoutManager(this)
         town_recycler_view.setHasFixedSize(true)
 
 
-       updateUi()
 
-
-    }
-
-
-    fun updateUi(){
-
-        val list: MutableList<Town> = ArrayList()
-        val weatherManager : WeatherManager = WeatherManager()
-       // list.add(weatherManager.loadCurrentWeather())
-weatherManager.loadCurrentWeather()
-
-
-        if (townListAdapter == null) {
-            townListAdapter =  TownListAdapter(list)
-            town_recycler_view.adapter = townListAdapter
-        } else {
-           // townListAdapter.setContacts(mBlockContacts);
-           // townListAdapter.notifyDataSetChanged();
+        add_town_fab.setOnClickListener {
+            intent = Intent(this, AddTownActivity::class.java)
+            startActivity(intent)
         }
 
 
+    }
 
 
+    fun updateUi() {
+        if (townListAdapter == null) {
+            townListAdapter = TownListAdapter(list)
+            town_recycler_view.adapter = townListAdapter
+        } else {
+             townListAdapter!!.setContacts(list)
+             townListAdapter!!.notifyDataSetChanged()
+        }
+    }
+
+
+    override fun onResume() {
+        super.onResume()
+        SomeTask().execute()
 
     }
 
 
+    inner class SomeTask : AsyncTask<Void, Void, Long>() {
+        override fun doInBackground(vararg params: Void?): Long {
+
+            runOnUiThread{
+                progressBar.visibility = View.VISIBLE
+            }
+
+
+            list = townManager.getAllTown()
+            val weathermanager = WeatherManager()
+
+
+            for (item in list) {
+                item.weather = weathermanager.loadCurrentWeather(item.name)
+            }
 
 
 
+            return 0
+        }
 
-    class TownListAdapter(private val townList: List<Town>) : RecyclerView.Adapter<TownListAdapter.TownListHolder>() {
+        override fun onPostExecute(result: Long?) {
+            super.onPostExecute(result)
+            progressBar.visibility = View.GONE
+            updateUi()
+        }
+    }
+
+
+    class TownListAdapter(private var townList: List<Town>) : RecyclerView.Adapter<TownListAdapter.TownListHolder>() {
 
 
         class TownListHolder(inflater: LayoutInflater, parent: ViewGroup) :
             RecyclerView.ViewHolder(inflater.inflate(R.layout.item_card_view_town, parent, false)) {
-
 
 
             private lateinit var town: Town
@@ -77,8 +104,8 @@ weatherManager.loadCurrentWeather()
             fun bind(town: Town) {
                 this.town = town
                 townName.text = town.name
-                townTemperature.text = town.temperature
-                windSpeed.text = town.windSpeed
+                townTemperature.text = town.weather.temperature
+                windSpeed.text = town.weather.windSpeed
             }
 
         }
@@ -100,6 +127,11 @@ weatherManager.loadCurrentWeather()
 
         override fun getItemCount(): Int {
             return townList.size
+        }
+
+        fun setContacts(list: List<Town>) {
+            this.townList = list
+
         }
 
     }
