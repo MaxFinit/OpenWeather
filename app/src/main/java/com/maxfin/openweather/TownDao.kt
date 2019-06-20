@@ -15,5 +15,8 @@ interface TownDao {
     @Delete
     fun delete(town: Town)
 
+    @Update
+    fun update(town:Town)
+
 
 }

@@ -12,6 +12,10 @@ class TownManager {
         database.insert(town)
     }
 
+    fun addTown(town: Town) {
+        database.insert(town)
+    }
+
 
     fun deleteTown(town: Town) {
         database.delete(town)
@@ -20,6 +24,13 @@ class TownManager {
     fun getAllTown(): List<Town> {
         return database.getAll()
     }
+
+
+    fun update(town:Town){
+        database.update(town)
+    }
+
+
 
 
 }
