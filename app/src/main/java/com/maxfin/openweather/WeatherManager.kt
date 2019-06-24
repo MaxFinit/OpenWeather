@@ -15,7 +15,7 @@ class WeatherManager {
     fun loadCurrentWeather(townName: String): Weather {
 
         val okHttpClient = OkHttpClient()
-        val url = "http://api.openweathermap.org/data/2.5/weather?q=$townName&appid=$apiKey&units=metric"
+        val url = "https://api.openweathermap.org/data/2.5/weather?q=$townName&appid=$apiKey&units=metric"
         val request: Request = Request.Builder().url(url).build()
         val response: Response = okHttpClient.newCall(request).execute()
         val json = response.body()?.string()
@@ -34,7 +34,7 @@ class WeatherManager {
 
         val okHttpClient = OkHttpClient()
         val url =
-            "http://api.openweathermap.org/data/2.5/weather?lat=$latitude&lon=$longitude&appid=$apiKey&units=metric"
+            "https://api.openweathermap.org/data/2.5/weather?lat=$latitude&lon=$longitude&appid=$apiKey&units=metric"
         val request: Request = Request.Builder().url(url).build()
         val response: Response = okHttpClient.newCall(request).execute()
         val json = response.body()?.string()
